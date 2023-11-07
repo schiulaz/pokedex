@@ -10,12 +10,12 @@
             v-model="search"
             bg-color="white"
             color="grey"
-            class="pokemon-shadow-1 q-mt-xl q-mb-md"
+            class="pokemon-shadow-1 q-my-md"
           >
             <template v-slot:prepend> <q-icon name="search" /> </template
           ></q-input>
           <q-scroll-area
-            style="height: calc(100vh - 180px)"
+            style="height: calc(100vh - 140px)"
             :thumb-style="thumbStyle"
             :bar-style="barStyle"
           >
@@ -54,34 +54,7 @@
       </div>
     </q-page>
 
-    <div style="position: absolute; bottom: 0; width: 100%">
-      <q-toolbar
-        class="row justify-center bg-white pokemon-shadow-2"
-        color="primary"
-      >
-        <q-btn
-          @click="favorites = false"
-          rounded
-          :color="!favorites ? 'primary' : 'secondary'"
-          size="sm"
-          class="row justify-center q-mx-sm"
-          ><q-icon name="list" size="20px" class="q-mr-sm"></q-icon>All
-        </q-btn>
-        <q-btn
-          @click="favorites = true"
-          rounded
-          :color="favorites ? 'primary' : 'secondary'"
-          size="sm"
-          class="row justify-center q-mx-sm"
-        >
-          <img
-            src="~assets/star-white.svg"
-            style="width: 12px"
-            class="q-mr-sm"
-          />Favorites</q-btn
-        >
-      </q-toolbar>
-    </div>
+    <PokemonToolbar @selectedList="selectedList" :favorites="favorites" />
   </template>
   <template v-else>
     <PokemonLoading v-if="isLoading" />
@@ -96,49 +69,15 @@ import { useStore } from "vuex";
 import PokemonCardDialog from "src/modules/pokedex/components/PokemonCardDialog.vue";
 import PokemonNotData from "src//modules/pokedex/components/PokemonNotData.vue";
 import PokemonLoading from "src//modules/pokedex/components/PokemonLoading.vue";
+import PokemonToolbar from "src/modules/pokedex/components/PokemonToolbar.vue";
 
 const store = useStore();
-
-const isLoading = computed(() => store.state.Pokedex.loading);
 const data = ref(null);
 const search = ref(null);
-const list = computed(() => store.state.Pokedex.data?.results);
-const loadData = async () => await store.dispatch("Pokedex/getPokemons");
-const selectedPokemon = ref(null);
 const detailDialog = ref(false);
-
 const favorites = ref(false);
-const setFavorite = (name) => {
-  store.commit("Pokedex/SET_FAVORITE", name);
-};
-
-const results = computed(() => {
-  if (favorites.value) {
-    if (search.value)
-      return filterBySearch(list.value.filter((item) => item.favorite));
-    else return list.value.filter((item) => item.favorite);
-  } else {
-    if (search.value) return filterBySearch(list.value);
-    else return list.value;
-  }
-});
-
-const filterBySearch = (list) => {
-  return list.filter((item) =>
-    item.name.toLowerCase().includes(search.value.toLowerCase())
-  );
-};
-
-const clearSearch = () => {
-  search.value = "";
-  favorites.value = false;
-};
-
-const openModal = async (name) => {
-  selectedPokemon.value = await store.dispatch("Pokedex/getPokemon", name);
-  detailDialog.value = true;
-};
-
+const starImage = new Image();
+const selectedPokemon = ref(null);
 const thumbStyle = {
   right: "0px",
   backgroundColor: "#6e6b7b",
@@ -154,8 +93,48 @@ const barStyle = {
   opacity: 0.0,
 };
 
+const isLoading = computed(() => store.state.Pokedex.loading);
+const list = computed(() => store.state.Pokedex.data?.results);
+const results = computed(() => {
+  if (favorites.value) {
+    if (search.value)
+      return filterBySearch(list.value.filter((item) => item.favorite));
+    else return list.value.filter((item) => item.favorite);
+  } else {
+    if (search.value) return filterBySearch(list.value);
+    else return list.value;
+  }
+});
+
+const loadData = async () => await store.dispatch("Pokedex/getPokemons");
+
+const setFavorite = (name) => {
+  store.commit("Pokedex/SET_FAVORITE", name);
+};
+
+const filterBySearch = (list) => {
+  return list.filter((item) =>
+    item.name.toLowerCase().includes(search.value.toLowerCase())
+  );
+};
+
+const clearSearch = () => {
+  search.value = "";
+  favorites.value = false;
+};
+
+const selectedList = (value) => {
+  favorites.value = value;
+};
+
+const openModal = async (name) => {
+  selectedPokemon.value = await store.dispatch("Pokedex/getPokemon", name);
+  detailDialog.value = true;
+};
+
 onMounted(async () => {
   data.value = await loadData();
+  starImage.src = "src/assets/star-favorite.svg";
 });
 </script>
 
@@ -164,19 +143,6 @@ onMounted(async () => {
   height: 100vh;
   overflow: auto;
   padding-bottom: 40px;
-}
-.pokemon-card-bg {
-  background-image: url("./../../../assets/bg.png");
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center bottom;
-  height: 220px;
-}
-
-.pokemon-card-close-btn {
-  position: absolute;
-  top: 0;
-  right: 0;
 }
 
 .pokemon-name {
@@ -191,10 +157,5 @@ onMounted(async () => {
   box-shadow: 1px 1px 12px 1px rgba(0, 0, 0, 0.1);
   -webkit-box-shadow: 1px 1px 12px 1px rgba(0, 0, 0, 0.1);
   -moz-box-shadow: 1px 1px 12px 1px rgba(0, 0, 0, 0.1);
-}
-.pokemon-shadow-2 {
-  box-shadow: 1px 1px 12px 1px rgba(0, 0, 0, 0.2);
-  -webkit-box-shadow: 1px 1px 12px 1px rgba(0, 0, 0, 0.2);
-  -moz-box-shadow: 1px 1px 12px 1px rgba(0, 0, 0, 0.2);
 }
 </style>

@@ -48,7 +48,7 @@
         color="primary"
         size="sm"
         class="q-mx-sm"
-        ><span class="q-px-sm">Share to my friends</span></q-btn
+        ><span class="q-px-sm text-capitalize">Share to my friends</span></q-btn
       >
 
       <img
@@ -82,6 +82,14 @@ const props = defineProps({
   },
 });
 
+const isFavorite = computed(() => {
+  let selected = store.state.Pokedex.data.results.find(
+    (item) => item.name == props.selectedPokemon.name
+  );
+  if (selected.favorite) return true;
+  else return false;
+});
+
 const copyToClipboard = async (selectedPokemon) => {
   let text = `Name: ${selectedPokemon.name}, Weight: ${
     selectedPokemon.weight
@@ -91,28 +99,20 @@ const copyToClipboard = async (selectedPokemon) => {
   try {
     await navigator.clipboard.writeText(text);
     $q.notify({
-      message: "Attributes have been copied",
+      caption: "Attributes have been copied",
       icon: "content_copy",
       color: "primary",
       position: "top-right",
     });
   } catch (err) {
     $q.notify({
-      message: "Attributes have not been copied",
+      caption: "Attributes have not been copied",
       icon: "warning",
       color: "negative",
       position: "top-right",
     });
   }
 };
-
-const isFavorite = computed(() => {
-  let selected = store.state.Pokedex.data.results.find(
-    (item) => item.name == props.selectedPokemon.name
-  );
-  if (selected.favorite) return true;
-  else return false;
-});
 
 const setFavorite = (name) => {
   store.commit("Pokedex/SET_FAVORITE", name);

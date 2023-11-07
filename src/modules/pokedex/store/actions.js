@@ -2,13 +2,13 @@ import { api } from "src/boot/axios";
 export function getPokemons({ commit }) {
   return new Promise((resolve, reject) => {
     commit('SET_LOADING', true)
-    api.get(`pokemon`)
+    api.get(`pokemon?limit=1300`)
       .then(async res => {
         commit('SET_POKEMONS', res.data)
         resolve(res.data);
         setTimeout(() => {
           commit('SET_LOADING', false)
-        }, 3000);
+        }, 1000);
 
       })
       .catch(err => {
